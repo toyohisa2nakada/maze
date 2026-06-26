@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<script src="jQuery/jquery-1.11.2.min.js"></script>
+		<script src="https://unpkg.com/blockly/blockly_compressed.js"></script>
+		<script src="https://unpkg.com/blockly/blocks_compressed.js"></script>
+		<script src="https://unpkg.com/blockly/javascript_compressed.js"></script>
+		<script src="https://unpkg.com/blockly/msg/en.js"></script>
+		<script src="msg/msg.js"></script>
+
+		<script>
+			Blockly.Blocks['straight'] = {
+				init: function() {
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(0);
+					this.appendDummyInput()
+						.appendField(opt.limitBlockConnection?"(1)":"")
+						.appendField(MazeLearningMsg.Block_Straight);
+					this.setPreviousStatement(true, "in_second_while");
+					if(opt.limitBlockConnection==false){
+						this.setPreviousStatement(true, "String");
+						this.setNextStatement(true, "String");
+					}
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['straight'] = function(block) {
+				var code = 'go("false");'+'\n';
+				return code;
+			};
+			Blockly.Blocks['turn'] = {
+				init: function() {
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(280);
+					this.appendDummyInput()
+						.appendField(opt.limitBlockConnection?"(2)":"")
+						.appendField(
+							new Blockly.FieldDropdown([
+								[MazeLearningMsg.Block_TurnLeft, "turnLeft();"],
+								[MazeLearningMsg.Block_TurnRight, "turnRight();"],
+								[MazeLearningMsg.Block_TurnBack, "turnBack();"],
+							]),"selections");
+					if(opt.limitBlockConnection){
+						this.setPreviousStatement(true, "in_if");
+					}else{
+						this.setPreviousStatement(true, "String");
+						this.setNextStatement(true, "String");
+					}
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['turn'] = function(block) {
+				var code = block.getFieldValue('selections')+'\n';
+				return code;
+			};
+			Blockly.Blocks['if'] = {
+				init: function() {
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(240);
+					this.appendDummyInput()
+						.appendField(opt.limitBlockConnection?"(3)":"")
+						.appendField(MazeLearningMsg.Block_If)
+						.appendField(new Blockly.FieldDropdown([
+							[MazeLearningMsg.Block_PathLeft, "canGo(90)"],
+							[MazeLearningMsg.Block_PathRight, "canGo(-90)"],
+							[MazeLearningMsg.Block_PathStraight, "canGo(0)"],
+						]),"selections")
+						.appendField(MazeLearningMsg.Block_If_AfterStr);
+					this.appendStatementInput("trueCase")
+						.setCheck(opt.limitBlockConnection?["in_if","in_while"]:"String")
+						.appendField(MazeLearningMsg.Block_Do+(opt.limitBlockConnection?"(2,3)":""));
+					this.appendStatementInput("falseCase")
+						.setCheck(opt.limitBlockConnection?["in_if","in_while"]:"String")
+						.appendField(MazeLearningMsg.Block_ElseDo+(opt.limitBlockConnection?"(2,3)":""));
+					this.setPreviousStatement(true, 'in_while');
+					if(opt.limitBlockConnection==false){
+						this.setPreviousStatement(true, "String");
+						this.setNextStatement(true, "String");
+					}
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['if'] = function(block){
+				var code =
+					'if('+block.getFieldValue('selections')+'){\n'+
+						Blockly.JavaScript.statementToCode(block,'trueCase')+
+					'}else{\n'+
+						Blockly.JavaScript.statementToCode(block,'falseCase')+
+					'}\n';
+				return code;
+			};
+			Blockly.Blocks['while_playerPlacedNumber'] = {
+					init: function() {
+						this.setHelpUrl('http://www.example.com/');
+						this.setColour(120);
+						this.appendDummyInput()
+							.appendField(opt.limitBlockConnection?"(4)":"")
+							.appendField(MazeLearningMsg.Block_Loop_PNumber_BeforeStr)
+							.appendField(new Blockly.FieldDropdown(opt.placedNumbersFunc(opt.placedNumbersAsc,true)),"selections")
+							.appendField(MazeLearningMsg.Block_Loop_PNumber_AfterStr);
+						this.appendStatementInput("trueCase")
+							.setCheck(opt.limitBlockConnection?["in_if","in_while"]:"String")
+							.appendField(MazeLearningMsg.Block_Do+(opt.limitBlockConnection?"(2,3)":""));
+						this.setInputsInline(true);
+
+						if(opt.limitBlockConnection){
+							this.appendStatementInput("straightCase")
+								.setCheck("in_second_while")
+								.appendField(MazeLearningMsg.Block_Do+(opt.limitBlockConnection?"(1)":""));
+						}else{
+							this.setPreviousStatement(true, "String");
+							this.setNextStatement(true, "String");
+						}
+						this.setTooltip('');
+					}
+			};
+			Blockly.JavaScript.forBlock['while_playerPlacedNumber'] = function(block) {
+//console.log("block = ",block)
+				var statements_truecase = Blockly.JavaScript.statementToCode(block,'trueCase');
+				// 'straightCase' only exists when limitBlockConnection is on (see
+				// Blockly.Blocks['while_playerPlacedNumber'] above) - modern Blockly's
+				// statementToCode() throws if the input doesn't exist on the block,
+				// unlike the old version which returned "" silently.
+				var statements_straightCase = block.getInput('straightCase') ? Blockly.JavaScript.statementToCode(block,'straightCase') : '';
+				var dropdown_name = block.getFieldValue('selections');
+				var code =
+					'while(getPlacedNumber()'+dropdown_name+'){\n'+
+						// test interactive whileブロックのハイライトがwhile文の上に位置するため、ループごとにwhileブロックをハイライトしてくれない。そのためにwhileだけwhile文の下にハイライトを入れる。
+						'highlightBlock(\''+block.id+'\');\n'+
+						statements_truecase+'\n'+
+						(opt.limitBlockConnection?statements_straightCase+'\n':'')+
+					'}\n';
+				return code;
+			};
+
+			Blockly.Blocks['set_variable'] = {
+				init: function(){
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(65);
+					this.appendDummyInput()
+						.appendField(MazeLearningMsg.Block_Set_Variable_BeforeVariableStr)
+						.appendField(new Blockly.FieldDropdown([["x", "blockly_variable_x"], ["y", "blockly_variable_y"]]), "selection_variable")
+						.appendField(MazeLearningMsg.Block_Set_Variable_AfterVariableStr)
+						.appendField(new Blockly.FieldDropdown([["0", "0"], ["1", "1"]]), "selection_value")
+						.appendField(MazeLearningMsg.Block_Set_Variable_AfterValueStr);
+					this.setInputsInline(true);
+					this.setPreviousStatement(true);
+					this.setNextStatement(true);
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['set_variable'] = function(block) {
+				var vname = block.getFieldValue('selection_variable');
+				var value = block.getFieldValue('selection_value');
+				Blockly.addVariable(vname);
+				return vname+'='+value+';\n';
+			};
+			Blockly.Blocks['change_variable'] = {
+				init: function(){
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(75);
+					this.appendDummyInput()
+						.appendField(
+							getLang()=="ja"?
+								(MazeLearningMsg.Block_Add_Variable_BeforeValueStr+'1'+MazeLearningMsg.Block_Add_Variable_BeforeVariableStr)
+								:
+								(new Blockly.FieldDropdown([
+									[MazeLearningMsg.Block_Add_Variable_BeforeValueStr+'1'+MazeLearningMsg.Block_Add_Variable_BeforeVariableStr+'',"+="],
+									[MazeLearningMsg.Block_Subtract_Variable_BeforeValueStr+'1'+MazeLearningMsg.Block_Subtract_Variable_BeforeVariableStr,"-="]
+								]))
+							,getLang()=="ja"?undefined:"selection_operator")
+						.appendField(new Blockly.FieldDropdown([["x", "blockly_variable_x"], ["y", "blockly_variable_y"]]), "selection")
+						.appendField(
+							getLang()=="ja"?
+								(new Blockly.FieldDropdown([
+									[MazeLearningMsg.Block_Add_Variable_AfterVariableStr,"+="],
+									[MazeLearningMsg.Block_Subtract_Variable_AfterVariableStr,"-="]
+								]))
+								:
+								(MazeLearningMsg.Block_Add_Variable_AfterVariableStr)
+							,getLang()=="ja"?"selection_operator":undefined)
+//						.appendField(MazeLearningMsg.Block_Add_Variable_AfterVariableStr);
+					this.setInputsInline(true);
+					this.setPreviousStatement(true);
+					this.setNextStatement(true);
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['change_variable'] = function(block) {
+				var dropdown_selection = block.getFieldValue('selection');
+				var operator = block.getFieldValue('selection_operator');
+				Blockly.addVariable(dropdown_selection);
+				return dropdown_selection+operator+'1;\n';
+			};
+			Blockly.Blocks['if_variable'] = {
+				init: function(){
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(240);
+					this.appendDummyInput()
+						.appendField(opt.limitBlockConnection?"(3)":"")
+						.appendField(MazeLearningMsg.Block_If)
+						.appendField(new Blockly.FieldDropdown([["x", "blockly_variable_x"], ["y", "blockly_variable_y"]]), "selection_variable")
+						.appendField(new Blockly.FieldDropdown([["==", "=="], ["!=", "!="]]), "selection_comparison")
+						.appendField(new Blockly.FieldTextInput("0"), "value");
+					this.appendStatementInput("trueCase")
+						.setCheck(opt.limitBlockConnection?["in_if","in_while"]:"String")
+						.appendField(MazeLearningMsg.Block_Do+(opt.limitBlockConnection?"(2,3)":""));
+					this.appendStatementInput("falseCase")
+						.setCheck(opt.limitBlockConnection?["in_if","in_while"]:"String")
+						.appendField(MazeLearningMsg.Block_ElseDo+(opt.limitBlockConnection?"(2,3)":""));
+					this.setPreviousStatement(true, 'in_while');
+					if(opt.limitBlockConnection==false){
+						this.setPreviousStatement(true, "String");
+						this.setNextStatement(true, "String");
+					}
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['if_variable'] = function(block){
+				var vname = block.getFieldValue('selection_variable');
+				var cmp = block.getFieldValue('selection_comparison');
+				var value = block.getFieldValue('value');
+				Blockly.addVariable(vname);
+				var code =
+					'if('+vname+cmp+value+'){\n'+
+						Blockly.JavaScript.statementToCode(block,'trueCase')+
+					'}else{\n'+
+						Blockly.JavaScript.statementToCode(block,'falseCase')+
+					'}\n';
+				return code;
+			};
+			Blockly.Blocks['while_variable'] = {
+					init: function() {
+						this.setHelpUrl('http://www.example.com/');
+						this.setColour(120);
+						this.appendDummyInput()
+							.appendField(opt.limitBlockConnection?"(4)":"")
+							.appendField(MazeLearningMsg.Block_Loop_PNumber_BeforeStr)
+							.appendField(new Blockly.FieldDropdown([["x", "blockly_variable_x"], ["y", "blockly_variable_y"]]), "selection_variable")
+							.appendField(new Blockly.FieldDropdown([["==", "!="], ["!=", "=="]]), "selection_comparison")
+							.appendField(new Blockly.FieldTextInput("0"), "value")
+							.appendField(MazeLearningMsg.Block_Loop_PNumber_AfterStr);
+						this.appendStatementInput("trueCase")
+							.setCheck(opt.limitBlockConnection?["in_if","in_while"]:"String")
+							.appendField(MazeLearningMsg.Block_Do+(opt.limitBlockConnection?"(2,3)":""));
+						this.setInputsInline(true);
+
+						if(opt.limitBlockConnection){
+							this.appendStatementInput("straightCase")
+								.setCheck("in_second_while")
+								.appendField(MazeLearningMsg.Block_Do+(opt.limitBlockConnection?"(1)":""));
+						}else{
+							this.setPreviousStatement(true, "String");
+							this.setNextStatement(true, "String");
+						}
+						this.setTooltip('');
+					}
+			};
+			Blockly.JavaScript.forBlock['while_variable'] = function(block) {
+				var statements_truecase = Blockly.JavaScript.statementToCode(block, 'trueCase');
+				// see while_playerPlacedNumber above: 'straightCase' only exists when
+				// limitBlockConnection is on, and statementToCode() now throws if the
+				// input doesn't exist on the block.
+				var statements_straightCase = block.getInput('straightCase') ? Blockly.JavaScript.statementToCode(block, 'straightCase') : '';
+				var vname = block.getFieldValue('selection_variable');
+				var cmp = block.getFieldValue('selection_comparison');
+				var value = block.getFieldValue('value');
+				Blockly.addVariable(vname);
+				var code =
+					'while('+vname+cmp+value+'){\n'+
+						statements_truecase+'\n'+
+						(opt.limitBlockConnection?statements_straightCase+'\n':'')+
+					'}\n';
+				return code;
+			};
+
+			Blockly.Blocks['function_definition'] = {
+				init: function() {
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(180);
+					this.appendDummyInput()
+						.appendField("to")
+						.appendField(new Blockly.FieldTextInput("func"), "functionName")
+						.appendField(opt.funcBlockType&1!=0?"with 'p'":"");
+					this.appendStatementInput("trueCase");
+					if(opt.funcBlockType&2!=0){
+						this.appendValueInput("return")
+							.setAlign(Blockly.ALIGN_RIGHT)
+							.appendField("return");
+					}
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['function_definition'] = function(block) {
+				var func = block.getFieldValue('functionName');
+				var trueCase = Blockly.JavaScript.statementToCode(block, 'trueCase');
+				var ret = Blockly.JavaScript.valueToCode(block, 'return', Blockly.JavaScript.ORDER_ATOMIC);
+				return "function "+func+"(p){"+trueCase+"return "+ret+";}";
+			};
+			Blockly.Blocks['function_call'] = {
+				init: function() {
+					this.setHelpUrl('http://www.example.com/');
+					this.setColour(180);
+					this.appendDummyInput()
+						.appendField(new Blockly.FieldTextInput("func"), "functionName");
+					if(opt.funcBlockType&1!=0){
+						this.appendValueInput("argument")
+							.setAlign(Blockly.ALIGN_RIGHT)
+							.appendField("'p'");
+					}
+					if(opt.funcBlockType&2!=0){
+						this.setOutput(true);
+					}else{
+						this.setPreviousStatement(true, "String");
+						this.setNextStatement(true, "String");
+					}
+					this.setTooltip('');
+				}
+			};
+			Blockly.JavaScript.forBlock['function_call'] = function(block) {
+				var func = block.getFieldValue('functionName');
+				var arg = Blockly.JavaScript.valueToCode(block, 'argument', Blockly.JavaScript.ORDER_ATOMIC);
+				return func+"("+arg+");";
+			};
+
+		</script>
+
+		<style>
+			html, body {
+				background-color: #fff;
+				margin: 0;
+				padding: 0;
+				overflow: hidden;
+				height: 100%;
+			}
+			.blocklySvg {
+				height: 100%;
+				width: 100%;
+			}
+			.blocklyAnimationLayer, .blocklyBlockDragSurface {
+				/* Blockly's own default CSS already sets these to pointer-events:none
+				   (they're purely visual host layers for animations/dragging) - but
+				   under heavy use from repeated highlightBlock() calls, an inline
+				   style="pointer-events:auto" gets left on one of them, covering the
+				   whole workspace and blocking all clicks/dragging beneath it. Force
+				   it back off with !important so the inline override can't stick. */
+				pointer-events: none !important;
+			}
+		</style>
+		<script>
+			var blocklyInjected = false;
+			var opt;
+			function init(options){
+				opt = $.extend({
+					'placedNumbersFunc':null,
+					'placedNumbersAsc':false,
+					'disableBlocks':[],
+					'limitBlockConnection':false,
+					'funcBlockType':0,				// bit order 1: argument, 2: return
+				},options===undefined?{}:options);
+				var blocks = [
+					'straight',
+					'turn',
+					'if',
+					'while_playerPlacedNumber',
+					'set_variable',
+					'change_variable',
+					'if_variable',
+					'while_variable',
+					'function_definition',
+					'function_call',
+				];
+				function disableBlockFunc(str){
+					if($.inArray(str,opt.disableBlocks)!=-1){
+						return true;
+					}
+					return false;
+				}
+				var toolbox = '';
+				toolbox += '<xml id="toolbox" style="display: none">';
+				for(var i=0;i<blocks.length;i++){
+					if(disableBlockFunc==null || false==disableBlockFunc(blocks[i])){
+						if(blocks[i] == 'variables'){
+						}else{
+							toolbox += '<block type="'+blocks[i]+'"></block>';
+						}
+					}
+				}
+				toolbox += '</xml>';
+				if(blocklyInjected==false){
+					Blockly.inject(document.body,{
+						toolbox:toolbox,
+						trashcan:true,
+						scrollbars:false,
+						media:'https://unpkg.com/blockly/media/',
+					});
+					blocklyInjected = true;
+					// --- Backward-compat shim: this codebase (BlocklyFrame.html/MazeBlockly.js/
+					// MazeLearning.js/Ghost.js/Scenes/*.js) was written against the pre-1.0
+					// Closure-based Blockly API. These globals were removed/renamed in modern
+					// Blockly (loaded from the CDN), so re-create them on top of the new API.
+					if(Blockly.Xml.textToDom===undefined){
+						Blockly.Xml.textToDom = Blockly.utils.xml.textToDom;
+					}
+					(function(){
+						// Modern Blockly swapped domToWorkspace's argument order from
+						// (workspace, xml) to (xml, workspace). All call sites in this
+						// codebase still use the old (workspace, xml) order, so detect
+						// the argument shape at call time and swap automatically instead
+						// of editing every call site (MazeBlockly.js + ~20 Scenes/*.js).
+						var newDomToWorkspace = Blockly.Xml.domToWorkspace;
+						Blockly.Xml.domToWorkspace = function(a,b){
+							if(a && a.RTL!==undefined && a.childNodes===undefined){
+								return newDomToWorkspace(b,a);
+							}
+							return newDomToWorkspace(a,b);
+						};
+					})();
+					if(Blockly.mainWorkspace===undefined){
+						Object.defineProperty(Blockly,'mainWorkspace',{
+							get:function(){ return Blockly.getMainWorkspace(); },
+						});
+					}
+					if(Blockly.addChangeListener===undefined){
+						Blockly.addChangeListener = function(fn){ return Blockly.getMainWorkspace().addChangeListener(fn); };
+					}
+					if(Blockly.removeChangeListener===undefined){
+						Blockly.removeChangeListener = function(fn){ return Blockly.getMainWorkspace().removeChangeListener(fn); };
+					}
+					if(Blockly.updateToolbox===undefined){
+						Blockly.updateToolbox = function(toolboxDef){ return Blockly.getMainWorkspace().updateToolbox(toolboxDef); };
+					}
+					if(Blockly.ALIGN_RIGHT===undefined){
+						Blockly.ALIGN_LEFT = -1;
+						Blockly.ALIGN_CENTRE = 0;
+						Blockly.ALIGN_RIGHT = 1;
+					}
+				}else{
+					Blockly.updateToolbox(toolbox);
+				}
+				// Let the top-level application know that Blockly is ready.
+				window.parent.blocklyLoaded(Blockly);
+			}
+			function getBlockSVG(){
+				var g = $('svg:first g:last').siblings(':last')[0].cloneNode(true);
+				var m = Blockly.mainWorkspace.getMetrics();
+				var viewBox = (m.contentLeft-m.viewLeft)+" "+m.contentTop+" "+m.contentWidth+" "+m.contentHeight;
+				var svg = $('<svg viewBox="'+viewBox+'" width="'+m.contentWidth+'" height="'+m.contentHeight+'" xmlns="http://www.w3.org/2000/svg" xmlns:html="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" class="blocklySvg">')
+					.append(g)[0];
+				return svg;
+			}
+		</script>
+	</head>
+	<body id="body" class="body" style="font-family:'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, 'ＭＳ Ｐゴシック', sans-serif;">
+	</body>
+</html>

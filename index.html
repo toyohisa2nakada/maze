@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-168086162-2"></script>
+	<script>
+		window.dataLayer = window.dataLayer || [];
+		function gtag(){dataLayer.push(arguments);}
+		gtag('js', new Date());
+		gtag('config', 'UA-168086162-2');
+	</script>
+
+
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>pecode.com</title>
+
+	<link rel="stylesheet" href="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css">
+	<script src="//code.jquery.com/jquery-1.12.2.min.js" integrity="sha256-lZFHibXzMHo3GGeehn1hudTAP3Sc0uKXBXAzHX1sjtk=" crossorigin="anonymous"></script>
+	<script src="//code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+
+	<style>
+		.tougarashi {width:20px;}
+	</style>
+</head>
+<body>
+	<div data-role="page">
+		<div data-role="header">
+			迷路プログラミング
+		</div>
+		<div data-role="content">
+
+			<label for="MazeLearning" style="margin:20px 0px 0px;">ショートセット（イージーモード） <img src="../img/tougarashi.png" class="tougarashi" /></label>
+			<div id="MazeLearning" data-role="controlgroup">
+				<a href="MazeLearningShort.html" rel="external" class="ui-btn">ショートセット（イージーモード）</a>
+			</div>
+
+			<label for="MazeLearning" style="margin:20px 0px 0px;">フルセット（ハードモード）<img src="../img/tougarashi.png" class="tougarashi" /><img src="../img/tougarashi.png" class="tougarashi" /><img src="../img/tougarashi.png" class="tougarashi" /></label>
+			<div id="MazeLearning" data-role="controlgroup">
+				<a href="MazeLearning.html" rel="external" class="ui-btn">フルセット（ハードモード）</a>
+			</div>
+
+			<label for="MazeLearning" style="margin:20px 0px 0px;">デモ（説明用）<img src="../img/tougarashi.png" class="tougarashi" /></label>
+			<div id="MazeLearning" data-role="controlgroup">
+				<a href="MazeLearningDemo.html" rel="external" class="ui-btn">デモ（迷路プログラミングの説明用）</a>
+			</div>
+
+		</div>
+		<div data-role="footer">
+		</div>
+	</div>
+</body>
+</html>
+

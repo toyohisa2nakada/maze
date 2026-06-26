@@ -1,0 +1,2 @@
+serviceClass: jp.ac.nuis.nakada.client.GreetingService
+path: 06C557F9D5D4B914B37FA5BF65CC7A9B.gwt.rpc

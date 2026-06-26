@@ -1,0 +1,287 @@
+<!doctype html>
+<!-- The DOCTYPE declaration above will set the     -->
+<!-- browser's rendering engine into                -->
+<!-- "Standards Mode". Replacing this declaration   -->
+<!-- with a "Quirks Mode" doctype is not supported. -->
+
+<html>
+	<head>
+		<!-- Global site tag (gtag.js) - Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-168086162-2"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'UA-168086162-2');
+		</script>
+
+
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+		<meta name="viewport" content="width=device-width, height=device-height">
+
+		<link type="text/css" rel="stylesheet" href="MazeLearning.css">
+		<title>Programming Learning on Maze</title>
+
+		<script type="text/javascript" language="javascript" src="mazelearning/mazelearning.nocache.js"></script>
+
+		<!-- jquery -->
+		<script src="jQuery/jquery-1.11.2.min.js"></script>
+		<script src="jQuery/jquery.easing.1.3.js"></script>
+
+		<!-- jquery tabs -->
+		<link rel="stylesheet" type="text/css" href="easyUI/default/easyui.css">
+		<link rel="stylesheet" type="text/css" href="easyUI/icon.css">
+		<script src="easyUI/jquery.easyui.min.js"></script>
+
+		<!-- blockly -->
+		<script src="blockly/blockly_compressed.js"></script>
+		<script src="blockly/blocks_compressed.js"></script>
+		<script src="blockly/msg/js/en.js"></script>
+		<script src="blockly/acorn_interpreter.js"></script>
+		<script src="blockly/javascript_compressed.js"></script>
+
+		<script src="msg/msg.js"></script>
+		<Script src="Ghost.js"></Script>
+		<script src="PushoutElement.js"></script>
+		<script src="MazeBlockly.js"></script>
+		<script src="MazeInstances.js"></script>
+		<script src="SubsetRules.js"></script>
+		<script src="MazeInterpreter.js"></script>
+		<link type="text/css" rel="stylesheet" href="BlocklyCopiedCss.css">
+
+		<!-- jquery for touch event on mobile (http://touchpunch.furf.com/) -->
+		<script src="jQuery/jquery.ui.touch-punch.min.js"></script>
+
+		<!-- pieMenu -->
+		<link rel="stylesheet" href="piemenu/css/piemenu.css">
+		<script src="piemenu/js/jquery.menu.js"></script>
+
+		<!-- jquery plugin -->
+		<script src="jquery.animation.element.js"></script>
+		<script src="jquery.instruct.js"></script>
+	</head>
+
+	<body id="body" class="body" style="font-family:'ヒラギノ角ゴ Pro W3', 'Hiragino Kaku Gothic Pro', メイリオ, Meiryo, 'ＭＳ Ｐゴシック', sans-serif;">
+
+		<!-- OPTIONAL: include this if you want history support -->
+		<iframe src="javascript:''" id="__gwt_historyFrame" tabIndex='-1' style="position:absolute;width:0;height:0;border:0"></iframe>
+
+		<!-- RECOMMENDED if your web app will not function without JavaScript enabled -->
+		<noscript>
+			<div style="width:22em;position:absolute;left:50%;margin-left:-11em;color:red;background-color:white;border:1px solid red;padding:4px;font-family:sans-serif;">
+				Your web browser must have JavaScript enabled
+				in order for this application to display correctly.
+			</div>
+		</noscript>
+
+		<!-- header normally problem statement is here. -->
+		<div id="header" style="width:1200px; height:42px;">
+			<img src="question.png" style="float:left;margin-left:10px;" />
+			<div id="question_sentence" style="float:left; font-size:90%;margin-left:5px;margin-top:-2px;">
+			</div>
+			<div id="scene" style="float:right;margin-top:6px;">
+				<div id="sceneTitle" style="float:left; margin-right:10px;">
+					<script>document.write(MazeLearningMsg.SceneTitle);</script>
+				</div>
+				<div id="clearSceneData" style="float:left; text-align:center;margin-left:10px;line-height:1em;margin-top:-4px;">
+					<script>document.write(MazeLearningMsg.SceneClearTitle);</script>
+				</div>
+			</div>
+		</div>
+
+		<!-- maze and controller -->
+		<div id="maze" style="float:left; width:280px; height:680px; border:solid #000000;">
+			<!-- maze -->
+			<div style="float:left; width:100%; height:260px; margin-left:4%; margin-top:10px; margin-bottom:60px; font-size:large;">
+				<div id="mazePunchCapacity" style="font-size:medium;"></div>
+				<div id="drawing_container" style="width:260px; height:260px; clear:both;"></div>
+				<div style="float:right; margin-right:20px;">
+<!-- 「もどる」「やりなおし」ボタンが改行されてしまうので、width:0pxを追加 -->
+					<select id="drawingResetNumber" style="width:0px;visibility:hidden;"></select>
+					<button id="drawingBack" style="margin-left:0px;margin-top:2px;">
+						<script>document.write(MazeLearningMsg.Manual_Back);</script>
+					</button>
+					<button id="drawingReset" style="margin-left:0px;margin-top:2px;">
+						<script>document.write(MazeLearningMsg.Manual_Set);</script>
+					</button>
+				</div>
+			</div>
+
+			<!-- pie menu -->
+			<div id="piemenu_container" class="piemenu_container" style="position:fixed; top:512px; left:154px;">
+				<div id="piemenu_rotation">
+					<a class="menu_button" title="Toggle"><span>Menu Toggle</span></a>
+					<div class="menu_option">
+						<div><a onclick="javascript:turnRight();"	class="rotate" href="javascript:void(0)"><span class="rotate_r">Item</span></a></div>
+						<div><a onclick="operationCounter.add('pieMenuGo');javascript:go();" class="go" href="javascript:void(0)"><span class="go">Item</span></a></div>
+						<div><a onclick="javascript:turnLeft();"	class="rotate" href="javascript:void(0)"><span class="rotate_l">Item</span></a></div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- intermediate -->
+		<div id="intermediate" style="float:left; margin-left:10px; height:680px; width:100px; /*border:solid #000000;*/">
+
+			<div style="font-size:x-large; margin-left:10px; margin-top:20%;">
+				<div id="sliderContainer" style="width:80px;">
+					<div id="slider"></div>
+				</div>
+				<button id="blocklyStartInterpreter" style="white-space: nowrap;font-size:small;">
+					<script>document.write(MazeLearningMsg.Manual_StartInterpreter);</script>
+				</button>
+<!--
+				<button id="blocklySimulation" style="white-space:nowarp;font-size:small;">
+					<script>document.write(MazeLearningMsg.Manual_Simulation);</script>
+				</button>
+-->
+				<div id="blocklyStartInterpreterCond" style="margin-left:0px; margin-top:-10px;">
+					<img src="arrow_left_d.png?" />
+				</div>
+			</div>
+
+			<div style="font-size:x-large; margin-left:5px; margin-top:20%;">
+				<button id="blocklyTraceOperation" style="white-space:nowrap;font-size:small;">
+					<script>document.write(MazeLearningMsg.Manual_TraceOperation);</script>
+				</button>
+				<div id="blocklyTraceOperationCond" style="margin-left:0px; margin-top:-10px;">
+					<img src="arrow_right_d.png" />
+				</div>
+			</div>
+
+			<div style="font-size:x-large; margin-left:5px; margin-top:20%;">
+				<button id="blocklyShowSubsetRules" style="white-space: nowrap;font-size:small;">
+					<script>document.write(MazeLearningMsg.Manual_ShowSubsetRules);</script>
+				</button>
+				<div id="blocklyShowSubsetRulesCond" style="margin-left:0px; margin-top:-10px;">
+					<img src="arrow_right_d.png" />
+				</div>
+			</div>
+
+			<div style="font-size:x-large; margin-left:5px; margin-top:20%;">
+				<button id="blocklyShowInstances" style="white-space: nowrap;font-size:small;">
+					<script>document.write(MazeLearningMsg.Manual_ShowInstances);</script>
+				</button>
+				<div id="blocklyShowInstancesCond" style="margin-left:0px; margin-top:-10px;">
+					<img src="arrow_right_d.png" />
+				</div>
+			</div>
+
+			<div style="font-size:x-large; margin-left:5px; margin-top:20%;">
+				<button id="blocklyExtraction" style="white-space: nowrap;font-size:small;">
+					<script>document.write(MazeLearningMsg.Manual_Extraction);</script>
+				</button>
+				<div id="blocklyExtractionCond" style="margin-left:0px; margin-top:-10px;">
+					<img src="arrow_right_d.png" />
+				</div>
+			</div>
+			
+			<!-- test interactive -->
+			<div id="debugCode" style="font-size:xx-small;">
+			</div>
+
+		</div>
+
+		<!-- blockly -->
+		<div id="blocklyContainer" style="float:left; margin-left:10px; height:680px; width:800px; border:solid #000000;">
+			<div id="mazeInstanceContainer" style="margin-left:1%;margin-top:5px;display:none;">
+				<script>
+					document.write('<table id="mazeInstances" title="'+MazeLearningMsg.InstancesTitle+'"></table>');
+				</script>
+			</div>
+			<div id="subsetRulesContainer" style="margin-left:1%;margin-top:5px;display:none;">
+			</div>
+
+			<div id="blocklyBlockCapacity" style="float:left;margin-top:10px;margin-left:1%;font-size:100%;"></div>
+<!-- original tab position -->
+			<script>
+				function blocklyLoaded(blockly){
+					// Called once Blockly is fully loaded.
+					window.Blockly = blockly;
+				}
+			</script>
+			<iframe id="blocklyFrame" src="BlocklyFrame.html"
+				style="float:left;width:98%;height:87%;margin-left:1%;"></iframe>
+			<div id="tabs" class="easyui-tabs" style="float:right; width:75%;height:28px; font-size:40%; margin-top:0px;"></div>
+		</div>
+
+		<!-- footer -->
+		<div id="footer" style="clear:both; width:1390px; height:24px;">
+			<div id="thanks" style="float:right;margin-top:2px;">Special thanks</div>
+			<select id="lang" style="float:right;margin-right:10px;margin-top:1px;"
+				onChange="document.cookie='lang='+this.options[this.selectedIndex].value;location.reload();">
+				<option value="en">English</option>
+				<option value="ja">日本語</option>
+				<option value="ja_hiragana">にほんご</option>
+			</select>
+			<script>$('#lang').val(getLang());</script>
+<!--
+			<div id="debugTest" style="float:right;margin-right:20px;margin-top:2px;">debugTest</div>
+-->
+		</div>
+
+		<!-- dialog data -->
+		<div id="thanks_dialog" title="Special Thanks" style="width:590px;height:320px;"
+			data-options="
+				title: 'Special Thanks',
+				buttons: '#dlg-buttons',
+				modal: true,
+			">
+			<div>This program is based on the following applications and libraries.</div>
+			<ul>
+				<li>Blockly Games: Maze. <a href="https://blockly-games.appspot.com/maze" target="_blank">https://blockly-games.appspot.com/maze</a></li>
+				<li>Blockly: Web-based visual programming editor. <a href="https://code.google.com/p/blockly/" target="_blank">https://code.google.com/p/blockly/</a></li>
+				<li>GWT and App Engine: Development environment and web server. <a href="http://www.gwtproject.org/" target="_blank">http://www.gwtproject.org/</a></li>
+				<li>jQuery: Javascript utility. <a href="http://jquery.com/" target="_blank">http://jquery.com/</a></li>
+				<li>jQuery EasyUI: jQuery library for UI. <a href="http://www.jeasyui.com/" target="_blank">http://www.jeasyui.com/</a></li>
+				<li>jQuery Easing Plugin. <a href="http://gsgd.co.uk/sandbox/jquery/easing/" target="_blank">http://gsgd.co.uk/sandbox/jquery/easing/</a></li>
+				<li>PieMenu: Pie type menu. <a href="https://github.com/Nikesh/Pie-Menu/" target="_blank">https://github.com/Nikesh/Pie-Menu/</a></li>
+			</ul>
+		</div>
+		<div id="dlg-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton" onclick="javascript:$('#thanks_dialog').dialog('close')">Close</a>
+		</div>
+
+		<!-- scene -->
+		<script src="Scenes/Scene.js"></script>
+		<script src="Scenes/SceneA1_BeginnerBase.js"></script>
+		<script src="Scenes/SceneA2_ElementaryBase.js"></script>
+		<script src="Scenes/SceneB1_IntermediateBase.js"></script>
+		<script src="Scenes/SceneB2_UpperIntermediateBase.js"></script>
+		<script src="Scenes/SceneC1_AdvancedBase.js"></script>
+
+		<script src="Scenes/SceneA1_01s.js"></script>
+		<script src="Scenes/SceneA1_02s.js"></script>
+		<script src="Scenes/SceneA1_03s.js"></script>
+		<script src="Scenes/SceneA1_04s.js"></script>
+		<script src="Scenes/SceneA1_05s.js"></script>
+		<script src="Scenes/SceneA2_01s.js"></script>
+		<script src="Scenes/SceneA2_02s.js"></script>
+		<script src="Scenes/SceneA2_03s.js"></script>
+		<script src="Scenes/SceneA2_04s.js"></script>
+		<script src="Scenes/SceneB1_01s.js"></script>
+		<script src="Scenes/SceneB1_02s.js"></script>
+		<script src="Scenes/SceneB1_03s.js"></script>
+		<script src="Scenes/SceneB1_04s.js"></script>
+		<script>
+			var sceneNames = [
+				'A1_01s', //1
+				'A1_02s', //2
+				'A1_03s', //3
+				'A1_04s', //4
+				'A1_05s', //5
+				'A2_01s', //6
+				'A2_02s', //7
+				'A2_03s', //8
+				'A2_04s', //9
+				'B1_01s', //10
+				'B1_02s', //11
+				'B1_03s', //12
+				'B1_04s', //13
+			];
+		</script>
+
+		<!-- maze application -->
+		<script src="MazeLearning.js"></script>
+	</body>
+</html>
